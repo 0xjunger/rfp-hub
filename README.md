@@ -38,7 +38,7 @@ packages/
 
 ## Documentation
 
-Full API reference, SDK docs, and the RFP Object Standard are available at the [docs site](https://docs.rfphub.org).
+Full API reference, SDK docs, and the RFP Object Standard are available at the [docs site](https://rfp-hub-docs.fly.dev/).
 
 ## License
 
