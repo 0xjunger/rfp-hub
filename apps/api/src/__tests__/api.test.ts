@@ -1,9 +1,94 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { eq, inArray } from 'drizzle-orm';
+import { fundingSources, fundingOpportunities, auditLog, submissions } from '@rfp-hub/db';
 import { app } from '../app.js';
+import { db } from '../db.js';
 
 function req(path: string, init?: RequestInit) {
   return app.request(path, init);
 }
+
+// Seed data for tests that expect records in the DB
+const suffix = Date.now();
+let seedSourceId: string;
+let seedOppIds: string[] = [];
+
+beforeAll(async () => {
+  const [source] = await db
+    .insert(fundingSources)
+    .values({
+      name: `API Test Source ${suffix}`,
+      slug: `api-test-source-${suffix}`,
+      description: 'Seed source for api.test.ts',
+    })
+    .returning();
+  seedSourceId = source.id;
+
+  const opps = await db
+    .insert(fundingOpportunities)
+    .values([
+      {
+        title: `API Test Grant ${suffix}`,
+        description: 'A test grant for API integration tests',
+        summary: 'Test grant',
+        rfpType: 'grant',
+        applicationUrl: `https://example.com/api-test-grant-${suffix}`,
+        sourceUrl: `https://example.com/api-test-src-${suffix}`,
+        slug: `api-test-grant-${suffix}`,
+        sourceId: seedSourceId,
+        submittedBy: 'api-test',
+        publisherType: 'community',
+        status: 'open',
+        categories: ['testing'],
+        ecosystems: ['ethereum', 'arbitrum'],
+        tags: ['test'],
+        eligibility: [],
+        requiredCredentials: [],
+      },
+      {
+        title: `API Test RFP ${suffix}`,
+        description: 'A test RFP for API integration tests',
+        summary: 'Test RFP',
+        rfpType: 'rfp',
+        applicationUrl: `https://example.com/api-test-rfp-${suffix}`,
+        sourceUrl: `https://example.com/api-test-rfp-src-${suffix}`,
+        slug: `api-test-rfp-${suffix}`,
+        sourceId: seedSourceId,
+        submittedBy: 'api-test',
+        publisherType: 'community',
+        status: 'open',
+        categories: ['defi'],
+        ecosystems: ['arbitrum'],
+        tags: ['test'],
+        eligibility: [],
+        requiredCredentials: [],
+      },
+    ])
+    .returning();
+  seedOppIds = opps.map((o) => o.id);
+});
+
+afterAll(async () => {
+  // Clean up submissions created by the submit test
+  const testSubs = await db
+    .select({ id: submissions.id })
+    .from(submissions)
+    .where(eq(submissions.title, 'Test Submission'));
+  const subIds = testSubs.map((s) => s.id);
+  if (subIds.length > 0) {
+    await db.delete(auditLog).where(inArray(auditLog.entityId, subIds));
+    await db.delete(submissions).where(inArray(submissions.id, subIds));
+  }
+
+  // Clean up seed opportunities and source
+  if (seedOppIds.length > 0) {
+    await db.delete(auditLog).where(inArray(auditLog.entityId, seedOppIds));
+    await db.delete(fundingOpportunities).where(inArray(fundingOpportunities.id, seedOppIds));
+  }
+  if (seedSourceId) {
+    await db.delete(fundingSources).where(eq(fundingSources.id, seedSourceId));
+  }
+});
 
 describe('Health', () => {
   it('GET /health → 200 with status ok', async () => {

@@ -11,6 +11,7 @@ function req(path: string, init?: RequestInit) {
 
 let testSourceId: string;
 let createdSourceId: string | null = null;
+let etagOppId: string | null = null;
 
 beforeAll(async () => {
   const sources = await db.select().from(fundingSources).limit(1);
@@ -28,6 +29,30 @@ beforeAll(async () => {
     testSourceId = result[0].id;
     createdSourceId = result[0].id;
   }
+
+  // Create at least one opportunity so ETag tests have data with a real updatedAt
+  const [opp] = await db
+    .insert(fundingOpportunities)
+    .values({
+      title: `M3 ETag Test ${Date.now()}`,
+      description: 'Needed for conditional GET tests',
+      summary: 'ETag test',
+      rfpType: 'grant',
+      applicationUrl: `https://example.com/m3-etag-${Date.now()}`,
+      sourceUrl: `https://example.com/m3-etag-src-${Date.now()}`,
+      slug: `m3-etag-${Date.now()}`,
+      sourceId: testSourceId,
+      submittedBy: 'test',
+      publisherType: 'community',
+      status: 'open',
+      categories: [],
+      ecosystems: [],
+      tags: [],
+      eligibility: [],
+      requiredCredentials: [],
+    })
+    .returning();
+  etagOppId = opp.id;
 });
 
 // ---------- ETag + If-Modified-Since ----------
@@ -76,6 +101,10 @@ describe('ETag + Conditional GET', () => {
 // ---------- Stale Entry Cleanup ----------
 
 afterAll(async () => {
+  if (etagOppId) {
+    await db.delete(auditLog).where(eq(auditLog.entityId, etagOppId));
+    await db.delete(fundingOpportunities).where(eq(fundingOpportunities.id, etagOppId));
+  }
   if (createdSourceId) {
     await db.delete(fundingSources).where(eq(fundingSources.id, createdSourceId));
   }
