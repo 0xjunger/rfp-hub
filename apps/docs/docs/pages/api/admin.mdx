@@ -1,0 +1,171 @@
+# Admin & Moderation
+
+Admin endpoints for reviewing community submissions and viewing the audit trail. All endpoints require admin authentication via the `X-API-Key` header.
+
+---
+
+## List Submissions
+
+```
+GET /api/v1/admin/submissions
+```
+
+Returns paginated community submissions.
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `status` | string | — | Filter by status: `pending`, `approved`, `rejected` |
+| `page` | number | `1` | Page number |
+| `limit` | number | `20` | Results per page (max 100) |
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "018e1234-...",
+      "title": "Privacy Research Grant",
+      "description": "Funding for ZK privacy research...",
+      "summary": "ZK privacy research grant",
+      "rfpType": "grant",
+      "status": "pending",
+      "submitterName": "Alice",
+      "submitterEmail": "alice@example.com",
+      "createdAt": "2026-01-15T10:00:00.000Z",
+      "reviewedBy": null,
+      "reviewedAt": null,
+      "reviewNotes": null,
+      "opportunityId": null
+    }
+  ],
+  "meta": {
+    "total": 5,
+    "page": 1,
+    "limit": 20
+  }
+}
+```
+
+### Example
+
+```bash
+curl 'https://rfp-hub-api.fly.dev/api/v1/admin/submissions?status=pending' \
+  -H 'X-API-Key: rfphub_admin_key...'
+```
+
+---
+
+## Get Submission
+
+```
+GET /api/v1/admin/submissions/:id
+```
+
+Returns a single submission by UUID. Returns `404` if not found.
+
+### Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `id` | UUID | Submission ID (path parameter) |
+
+---
+
+## Review Submission
+
+```
+POST /api/v1/admin/submissions/:id/review
+```
+
+Approve or reject a community submission.
+
+- **Approve**: Creates a new funding opportunity from the submission data and links them.
+- **Reject**: Marks the submission as rejected with optional notes.
+
+### Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `id` | UUID | Submission ID (path parameter) |
+
+### Request Body
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `action` | string | Yes | `approve` or `reject` |
+| `reviewNotes` | string | No | Notes explaining the decision |
+
+### Response
+
+```json
+{
+  "message": "Submission approved. Opportunity created.",
+  "opportunityId": "018e5678-..."
+}
+```
+
+For rejections, `opportunityId` is `null`.
+
+### Example
+
+```bash
+curl -X POST 'https://rfp-hub-api.fly.dev/api/v1/admin/submissions/018e1234-.../review' \
+  -H 'X-API-Key: rfphub_admin_key...' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "action": "approve",
+    "reviewNotes": "Verified with source organization."
+  }'
+```
+
+---
+
+## Audit Log
+
+```
+GET /api/v1/admin/audit-log
+```
+
+Returns a filterable, paginated trail of all write operations (create, update, approve, reject, rotate_key, revoke, bulk_import).
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `entityType` | string | — | Filter by entity: `opportunity`, `submission`, `publisher` |
+| `action` | string | — | Filter by action: `create`, `approve`, `reject`, `rotate_key`, `revoke`, `bulk_import`, etc. |
+| `page` | number | `1` | Page number |
+| `limit` | number | `50` | Results per page (max 100) |
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "018e9abc-...",
+      "entityType": "submission",
+      "entityId": "018e1234-...",
+      "action": "approve",
+      "changes": { "opportunityId": "018e5678-..." },
+      "performedBy": "018e0001-...",
+      "performedAt": "2026-01-15T12:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "total": 42,
+    "page": 1,
+    "limit": 50
+  }
+}
+```
+
+### Example
+
+```bash
+curl 'https://rfp-hub-api.fly.dev/api/v1/admin/audit-log?entityType=publisher&page=1' \
+  -H 'X-API-Key: rfphub_admin_key...'
+```

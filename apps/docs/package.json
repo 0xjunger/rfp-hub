@@ -1,0 +1,13 @@
+{
+  "name": "@rfp-hub/docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vocs dev",
+    "build": "vocs build",
+    "preview": "vocs preview"
+  },
+  "devDependencies": {
+    "vocs": "1.0.12"
+  }
+}

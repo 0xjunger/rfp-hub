@@ -1,0 +1,63 @@
+# Bulk Export
+
+## Export Opportunities
+
+```
+GET /api/v1/export
+```
+
+Export funding opportunities in bulk as JSON or CSV. Supports the same filters as the search endpoint.
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `format` | `json` \| `csv` | `json` | Output format |
+| `limit` | number | `10000` | Max records to export (max 10,000) |
+| `q` | string | — | Full-text search |
+| `type` | string | — | Filter by type (comma-separated) |
+| `status` | string | — | Filter by status (comma-separated) |
+| `ecosystem` | string | — | Filter by ecosystem |
+| `funder` | string | — | Filter by funding source |
+| `category` | string | — | Filter by category |
+| `tag` | string | — | Filter by tag |
+| `min_budget` | number | — | Minimum budget |
+| `max_budget` | number | — | Maximum budget |
+| `closing_after` | ISO date | — | Closing after date |
+| `closing_before` | ISO date | — | Closing before date |
+
+### JSON Export
+
+```bash
+curl 'http://localhost:3000/api/v1/export?format=json&status=open'
+```
+
+```json
+{
+  "data": [
+    { "id": "...", "title": "...", ... }
+  ]
+}
+```
+
+### CSV Export
+
+```bash
+curl 'http://localhost:3000/api/v1/export?format=csv' -o opportunities.csv
+```
+
+CSV columns: `id`, `title`, `summary`, `rfpType`, `status`, `budgetMin`, `budgetMax`, `currency`, `opensAt`, `closesAt`, `applicationUrl`, `sourceUrl`, `ecosystems`, `categories`, `tags`.
+
+Content-Type: `text/csv`
+Content-Disposition: `attachment; filename="opportunities.csv"`
+
+### Examples
+
+```bash
+# Export all open Ethereum grants as CSV
+curl 'http://localhost:3000/api/v1/export?format=csv&type=grant&ecosystem=ethereum&status=open' \
+  -o eth-grants.csv
+
+# Export everything as JSON
+curl 'http://localhost:3000/api/v1/export' -o all-opportunities.json
+```

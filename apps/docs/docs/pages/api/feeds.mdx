@@ -1,0 +1,72 @@
+# RSS & Atom Feeds
+
+RFP Hub provides syndication feeds for open funding opportunities.
+
+## RSS 2.0
+
+```
+GET /feed/rss
+```
+
+```bash
+curl 'http://localhost:3000/feed/rss'
+```
+
+Content-Type: `application/rss+xml`
+
+## Atom 1.0
+
+```
+GET /feed/atom
+```
+
+```bash
+curl 'http://localhost:3000/feed/atom'
+```
+
+Content-Type: `application/atom+xml`
+
+## Feed Contents
+
+Both feeds contain the **50 most recent open opportunities**, sorted by creation date (newest first). Each entry includes:
+
+| Field | Feed Element |
+|---|---|
+| Title | `<title>` |
+| Application URL | `<link>` |
+| Summary | `<description>` |
+| Full description | `<content:encoded>` (RSS) / `<content>` (Atom) |
+| Created date | `<pubDate>` (RSS) / `<published>` (Atom) |
+| Categories | `<category>` elements |
+| Opportunity ID | `<guid>` (RSS) / `<id>` (Atom) |
+
+## Usage Examples
+
+### Subscribe in a feed reader
+
+Add either URL to your preferred RSS reader (Feedly, Miniflux, NetNewsWire, etc.):
+
+```
+https://rfp-hub-api.fly.dev/feed/rss
+https://rfp-hub-api.fly.dev/feed/atom
+```
+
+### Poll programmatically
+
+```typescript
+// Check for new opportunities every hour
+const res = await fetch('https://rfp-hub-api.fly.dev/feed/rss');
+const xml = await res.text();
+// Parse with your preferred RSS library
+```
+
+### Add to Next.js layout
+
+```html
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title="RFP Hub"
+  href="/feed/rss"
+/>
+```

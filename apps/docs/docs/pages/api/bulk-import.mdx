@@ -1,0 +1,99 @@
+# Bulk Import
+
+Import multiple funding opportunities in a single request with automatic deduplication. Requires publisher authentication via the `X-API-Key` header.
+
+---
+
+## Import Opportunities
+
+```
+POST /api/v1/bulk-import
+```
+
+### Request Body
+
+```json
+{
+  "opportunities": [
+    {
+      "title": "Privacy Research Grant",
+      "description": "Funding for ZK privacy research...",
+      "summary": "ZK privacy research grant",
+      "slug": "privacy-research-grant",
+      "rfpType": "grant",
+      "status": "open",
+      "applicationUrl": "https://example.com/apply",
+      "sourceUrl": "https://example.com/grants",
+      "sourceId": "018e1234-...",
+      "ecosystems": ["ethereum"],
+      "categories": ["research", "privacy"],
+      "tags": [],
+      "eligibility": [],
+      "requiredCredentials": [],
+      "publisherType": "api"
+    }
+  ]
+}
+```
+
+### Response
+
+```json
+{
+  "imported": 8,
+  "duplicates": 2,
+  "errors": [
+    { "index": 5, "message": "Invalid sourceId" }
+  ]
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `imported` | number | Count of successfully imported opportunities |
+| `duplicates` | number | Count of skipped exact-URL duplicates |
+| `errors` | array | Per-item errors with index and message |
+
+---
+
+## Deduplication Behavior
+
+The bulk import endpoint checks each opportunity against existing records:
+
+- **Exact URL match** (`sourceUrl` or `applicationUrl`): The opportunity is **skipped** and counted as a duplicate.
+- **Fuzzy title match**: The opportunity is **imported** but linked to the potential duplicate via the `duplicateOf` field, along with the similarity score.
+
+This ensures no data is silently lost — fuzzy matches are imported but flagged for review.
+
+---
+
+## Example
+
+```bash
+curl -X POST 'https://rfp-hub-api.fly.dev/api/v1/bulk-import' \
+  -H 'X-API-Key: rfphub_...' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "opportunities": [
+      {
+        "title": "DeFi Security Audit Grant",
+        "description": "Funding for security audits of DeFi protocols.",
+        "summary": "Security audit grant",
+        "slug": "defi-security-audit-grant",
+        "rfpType": "grant",
+        "status": "open",
+        "applicationUrl": "https://example.com/apply",
+        "sourceUrl": "https://example.com/grants/defi-audit",
+        "sourceId": "018e1234-...",
+        "ecosystems": ["ethereum"],
+        "categories": ["security"],
+        "tags": ["audit", "defi"],
+        "eligibility": [],
+        "requiredCredentials": [],
+        "publisherType": "api"
+      }
+    ]
+  }'
+```
+
+All imported opportunities are recorded in the [audit log](/api/admin#audit-log) with the `bulk_import` action.

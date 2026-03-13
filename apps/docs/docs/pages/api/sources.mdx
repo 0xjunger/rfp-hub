@@ -1,0 +1,82 @@
+# Funding Sources
+
+## List Sources
+
+```
+GET /api/v1/sources
+```
+
+Returns all active funding sources.
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "018e1234-...",
+      "name": "Ethereum Foundation ESP",
+      "slug": "ethereum-foundation-esp",
+      "description": "Ecosystem Support Program...",
+      "websiteUrl": "https://esp.ethereum.foundation",
+      "ecosystems": ["ethereum"],
+      "isActive": true,
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+### Source Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | UUID | Unique identifier |
+| `name` | string | Organization name |
+| `slug` | string | URL-friendly identifier |
+| `description` | string | Organization description |
+| `websiteUrl` | URL | Organization website |
+| `logoUrl` | URL | Organization logo |
+| `contactEmail` | email | Contact email |
+| `ecosystems` | string[] | Ecosystems this source funds |
+| `isActive` | boolean | Whether source is active |
+
+---
+
+## Get Source
+
+```
+GET /api/v1/sources/:id
+```
+
+Returns a single funding source by UUID.
+
+### Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `id` | UUID | Source ID (path parameter) |
+
+### Response
+
+Returns the full `FundingSource` object. Returns `404` if not found.
+
+---
+
+## Seeded Sources
+
+RFP Hub ships with 8 pre-configured funding sources:
+
+| Source | Ecosystems | Status |
+|---|---|---|
+| Ethereum Foundation ESP | ethereum | Live ingestion (EF ESP scraper, 6h) |
+| Optimism Collective | optimism | Seeded |
+| Arbitrum Foundation | arbitrum | Seeded |
+| Gitcoin | ethereum, multi-chain | Seeded |
+| Starknet Foundation | starknet | Seeded |
+| Uniswap Foundation | ethereum | Seeded |
+| Polygon Labs | polygon | Seeded |
+| Protocol Guild | ethereum | Seeded |
+
+> Ingestion adapters for RSS and DAOIP-5 JSON are implemented but not yet configured for all sources. Only EF ESP has live automated ingestion.

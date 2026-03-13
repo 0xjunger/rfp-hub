@@ -1,0 +1,36 @@
+{
+  "name": "@rfp-hub/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=../../.env src/index.ts",
+    "build": "tsc",
+    "start": "node --env-file=../../.env dist/index.js",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "node --env-file=../../.env ./node_modules/.bin/vitest run"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.0",
+    "@hono/zod-openapi": "^0.18.0",
+    "@rfp-hub/db": "*",
+    "@rfp-hub/schema": "*",
+    "node-cron": "^3.0.0",
+    "cheerio": "^1.1.0",
+    "drizzle-orm": "^0.38.0",
+    "feed": "^4.2.0",
+    "hono": "^4.6.0",
+    "ioredis": "^5.4.0",
+    "postgres": "^3.4.0",
+    "rss-parser": "^3.13.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/node-cron": "^3.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}

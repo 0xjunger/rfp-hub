@@ -1,0 +1,172 @@
+# TypeScript SDK
+
+The `@rfp-hub/sdk` package provides a typed TypeScript client for the RFP Hub API. It uses the native `fetch` API with zero external dependencies.
+
+## Installation
+
+The SDK is a **workspace package** within the rfp-hub monorepo. It is not yet published to npm.
+
+```bash
+# Within the monorepo, it's available via npm workspaces:
+# No install needed — just import it
+import { RfpHubClient } from '@rfp-hub/sdk';
+```
+
+> npm publish is planned for a future release.
+
+## Quick Start
+
+```typescript
+import { RfpHubClient } from '@rfp-hub/sdk';
+
+const client = new RfpHubClient({
+  baseUrl: 'https://rfp-hub-api.fly.dev',
+});
+
+const { data, meta } = await client.searchOpportunities({
+  q: 'privacy',
+  ecosystem: 'ethereum',
+});
+
+console.log(`Found ${meta.total} opportunities`);
+```
+
+## Constructor
+
+```typescript
+new RfpHubClient(options: ClientOptions)
+```
+
+| Option | Type | Required | Description |
+|---|---|---|---|
+| `baseUrl` | string | Yes | API base URL (e.g., `https://rfp-hub-api.fly.dev`) |
+| `apiKey` | string | No | API key for authenticated endpoints (sent as `X-API-Key` header) |
+
+## Methods
+
+### `searchOpportunities(params?)`
+
+Search and list funding opportunities.
+
+```typescript
+searchOpportunities(
+  params?: Partial<SearchOpportunities>
+): Promise<PaginatedResponse<FundingOpportunity>>
+```
+
+**Parameters** — all optional:
+
+| Param | Type | Description |
+|---|---|---|
+| `q` | string | Full-text search query |
+| `type` | string | Filter by rfpType |
+| `status` | string | Filter by status |
+| `ecosystem` | string | Filter by ecosystem |
+| `funder` | string | Filter by source slug |
+| `category` | string | Filter by category |
+| `tag` | string | Filter by tag |
+| `min_budget` | number | Minimum budget |
+| `max_budget` | number | Maximum budget |
+| `closing_after` | Date | Only closing after this date |
+| `closing_before` | Date | Only closing before this date |
+| `sort` | string | Sort field:direction (default: `created_at:desc`) |
+| `page` | number | Page number (default: 1) |
+| `limit` | number | Results per page (default: 20, max: 100) |
+| `cursor` | string | Cursor for keyset pagination |
+
+**Returns:** `{ data: FundingOpportunity[], meta: { total, page, limit, hasMore } }`
+
+---
+
+### `getOpportunity(id)`
+
+Get a single opportunity by ID.
+
+```typescript
+getOpportunity(id: string): Promise<FundingOpportunity>
+```
+
+Throws on `404`.
+
+---
+
+### `createOpportunity(data)`
+
+Create a new opportunity. **Requires API key.**
+
+```typescript
+createOpportunity(data: CreateOpportunity): Promise<FundingOpportunity>
+```
+
+---
+
+### `updateOpportunity(id, data)`
+
+Update an existing opportunity. **Requires API key.**
+
+```typescript
+updateOpportunity(id: string, data: UpdateOpportunity): Promise<FundingOpportunity>
+```
+
+Partial update — only include fields you want to change.
+
+---
+
+### `listSources()`
+
+List all active funding sources.
+
+```typescript
+listSources(): Promise<{ data: FundingSource[] }>
+```
+
+---
+
+### `getSource(id)`
+
+Get a single funding source by ID.
+
+```typescript
+getSource(id: string): Promise<FundingSource>
+```
+
+---
+
+### `submitOpportunity(data)`
+
+Submit a community opportunity for review. No API key needed.
+
+```typescript
+submitOpportunity(data: CreateSubmission): Promise<{
+  message: string;
+  submissionId: string;
+}>
+```
+
+## Error Handling
+
+All methods throw on non-2xx responses:
+
+```typescript
+try {
+  const opp = await client.getOpportunity('invalid-id');
+} catch (err) {
+  // Error: RFP Hub API error 404: {"error":"Opportunity not found"}
+  console.error(err.message);
+}
+```
+
+## Types
+
+All types are re-exported from `@rfp-hub/schema`:
+
+```typescript
+import type {
+  FundingOpportunity,
+  FundingSource,
+  SearchOpportunities,
+  CreateOpportunity,
+  UpdateOpportunity,
+  CreateSubmission,
+} from '@rfp-hub/schema';
+```

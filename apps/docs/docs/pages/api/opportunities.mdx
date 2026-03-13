@@ -1,0 +1,122 @@
+# Opportunities
+
+## Search Opportunities
+
+```
+GET /api/v1/opportunities
+```
+
+Returns a paginated list of funding opportunities with full-text search and filters.
+
+### Query Parameters
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `q` | string | — | Full-text search query (max 500 chars). Uses PostgreSQL FTS with relevance ranking. |
+| `type` | string | — | Filter by type. Comma-separated: `rfp`, `grant`, `bounty`, `fellowship`, `hackathon` |
+| `status` | string | — | Filter by status. Comma-separated: `draft`, `open`, `closing_soon`, `closed`, `awarded` |
+| `ecosystem` | string | — | Filter by ecosystem (e.g., `ethereum`, `optimism`) |
+| `funder` | string | — | Filter by funding source slug |
+| `category` | string | — | Filter by category |
+| `tag` | string | — | Filter by tag |
+| `min_budget` | number | — | Minimum budget filter |
+| `max_budget` | number | — | Maximum budget filter |
+| `closing_after` | ISO date | — | Only opportunities closing after this date |
+| `closing_before` | ISO date | — | Only opportunities closing before this date |
+| `sort` | string | `created_at:desc` | Sort field and direction. Options: `created_at`, `closes_at`, `budget_max`, `title` with `:asc` or `:desc` |
+| `page` | number | `1` | Page number |
+| `limit` | number | `20` | Results per page (max 100) |
+| `cursor` | UUID | — | Cursor for keyset pagination |
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "018e1234-5678-7890-abcd-ef1234567890",
+      "title": "Privacy Research Grant",
+      "summary": "Funding for ZK privacy research...",
+      "rfpType": "grant",
+      "status": "open",
+      "budgetMin": 10000,
+      "budgetMax": 50000,
+      "currency": "USD",
+      "ecosystems": ["ethereum"],
+      "categories": ["research", "privacy"],
+      "applicationUrl": "https://example.com/apply",
+      "closesAt": "2026-06-30T00:00:00.000Z",
+      "createdAt": "2026-03-01T00:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "total": 23,
+    "page": 1,
+    "limit": 20,
+    "hasMore": true,
+    "nextCursor": "018e1234-..."
+  }
+}
+```
+
+### Conditional GET
+
+This endpoint supports `ETag` and `If-Modified-Since` headers. Responses include `Cache-Control: public, max-age=60`.
+
+---
+
+## Get Opportunity
+
+```
+GET /api/v1/opportunities/:id
+```
+
+Returns a single opportunity by UUID.
+
+### Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `id` | UUID | Opportunity ID (path parameter) |
+
+### Response
+
+Returns the full `FundingOpportunity` object. Returns `404` if not found or inactive.
+
+---
+
+## Create Opportunity
+
+```
+POST /api/v1/opportunities
+```
+
+**Requires API key** (`X-API-Key` header).
+
+### Request Body
+
+All fields from the [RFP Object Standard](/standard) except system-managed fields (`id`, `createdAt`, `updatedAt`, `version`, `verifiedBy`, `verifiedAt`, `duplicateOf`).
+
+Required fields: `title`, `description`, `summary`, `rfpType`, `slug`, `status`, `sourceId`, `applicationUrl`, `sourceUrl`, `submittedBy`, `publisherType`, `currency`, `categories`, `ecosystems`, `tags`, `eligibility`, `requiredCredentials`.
+
+### Response
+
+Returns the created opportunity with `201` status.
+
+---
+
+## Update Opportunity
+
+```
+PUT /api/v1/opportunities/:id
+```
+
+**Requires API key** (`X-API-Key` header).
+
+### Request Body
+
+Partial update — only include fields you want to change. All fields from the create schema are accepted, but none are required.
+
+### Response
+
+Returns the updated opportunity. Returns `404` if not found. Version is auto-incremented.

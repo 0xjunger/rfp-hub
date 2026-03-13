@@ -1,0 +1,31 @@
+{
+  "name": "rfp-hub",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "db:generate": "turbo db:generate --filter=@rfp-hub/db",
+    "db:migrate": "turbo db:migrate --filter=@rfp-hub/db",
+    "db:push": "turbo db:push --filter=@rfp-hub/db",
+    "seed": "tsx --env-file=.env data/seeds/seed.ts",
+    "create-admin": "tsx --env-file=.env data/create-admin.ts",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.4.0",
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.0"
+  },
+  "packageManager": "npm@10.9.0",
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

@@ -1,0 +1,154 @@
+# API Overview
+
+The RFP Hub API is a RESTful JSON API built with [Hono](https://hono.dev).
+
+## Base URL
+
+```
+https://rfp-hub-api.fly.dev/api/v1
+```
+
+## Authentication
+
+Most read endpoints are **public** — no authentication needed.
+
+Write endpoints require an API key passed via the `X-API-Key` header. There are two auth levels:
+
+### Publisher (API Key)
+
+Any publisher can create and update opportunities, bulk import, and submit data. Pass the key via `X-API-Key`:
+
+```bash
+curl -H 'X-API-Key: rfphub_...' \
+  -X POST 'https://rfp-hub-api.fly.dev/api/v1/opportunities' \
+  -H 'Content-Type: application/json' \
+  -d '{ ... }'
+```
+
+### Admin
+
+Admin-only endpoints (publisher management, submission review, audit log) require an API key belonging to a publisher with admin privileges.
+
+### How API Keys Work
+
+1. An admin creates a publisher via `POST /api/v1/publishers` with a name and contact email.
+2. The response includes a **one-time API key** (format: `rfphub_...`). This is the only time the key is shown.
+3. The key is stored as a **SHA-256 hash** — it cannot be retrieved later, only rotated.
+
+Community submissions (`POST /api/v1/submit`) do not require authentication.
+
+## Rate Limits
+
+| Endpoint | Limit |
+|---|---|
+| General API (`/api/*`) | 100 requests/minute |
+| Feed endpoints (`/feed/*`) | 100 requests/minute |
+| Community submissions | 10 requests/minute |
+| Bulk import | 5 requests/minute |
+| Admin endpoints (`/api/v1/admin/*`) | 100 requests/minute |
+
+Rate limits are per-IP, enforced with a Redis-backed sliding window. When exceeded, the API returns `429 Too Many Requests`.
+
+## Pagination
+
+All list endpoints support two pagination modes.
+
+### Offset Pagination
+
+Simple page-based pagination — best for browsing and UIs.
+
+| Parameter | Default | Description |
+|---|---|---|
+| `page` | `1` | Page number (1-indexed) |
+| `limit` | `20` | Results per page (max 100) |
+
+```bash
+curl 'https://rfp-hub-api.fly.dev/api/v1/opportunities?page=2&limit=10'
+```
+
+### Cursor Pagination
+
+Stable iteration over changing data — best for sync and automation. Use the `nextCursor` value from the previous response:
+
+```bash
+curl 'https://rfp-hub-api.fly.dev/api/v1/opportunities?cursor=018e...'
+```
+
+Both modes return a `meta` object:
+
+```json
+{
+  "data": [...],
+  "meta": {
+    "total": 150,
+    "page": 1,
+    "limit": 20,
+    "hasMore": true,
+    "nextCursor": "018e..."
+  }
+}
+```
+
+## Conditional GET (ETag)
+
+The search endpoint supports `ETag` and `If-Modified-Since` for cache validation:
+
+```bash
+# First request — note the ETag
+curl -i 'https://rfp-hub-api.fly.dev/api/v1/opportunities'
+# ETag: "a1b2c3d4e5f67890"
+# Last-Modified: Thu, 13 Mar 2026 10:00:00 GMT
+
+# Subsequent request — send ETag back
+curl -H 'If-None-Match: "a1b2c3d4e5f67890"' \
+  'https://rfp-hub-api.fly.dev/api/v1/opportunities'
+# Returns 304 Not Modified (no body)
+```
+
+## OpenAPI Spec
+
+The auto-generated OpenAPI 3.1 spec is available at:
+
+```
+GET /api/v1/openapi
+```
+
+## Endpoints
+
+### Public
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/health` | Health check |
+| `GET` | `/api/v1/schema` | JSON Schema definitions |
+| `GET` | `/api/v1/openapi` | OpenAPI 3.1 spec |
+| `GET` | [`/api/v1/opportunities`](/api/opportunities) | Search & list opportunities |
+| `GET` | [`/api/v1/opportunities/:id`](/api/opportunities) | Get opportunity by ID |
+| `POST` | [`/api/v1/submit`](/api/submit) | Community submission |
+| `GET` | [`/api/v1/sources`](/api/sources) | List funding sources |
+| `GET` | [`/api/v1/sources/:id`](/api/sources) | Get funding source |
+| `GET` | [`/api/v1/export`](/api/export) | Bulk export (JSON/CSV) |
+| `GET` | [`/feed/rss`](/api/feeds) | RSS 2.0 feed |
+| `GET` | [`/feed/atom`](/api/feeds) | Atom 1.0 feed |
+
+### Authenticated (API Key)
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | [`/api/v1/opportunities`](/api/opportunities) | Create opportunity |
+| `PUT` | [`/api/v1/opportunities/:id`](/api/opportunities) | Update opportunity |
+| `POST` | [`/api/v1/bulk-import`](/api/bulk-import) | Bulk import with dedup |
+
+### Admin Only
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | [`/api/v1/publishers`](/api/publishers) | Create publisher |
+| `GET` | [`/api/v1/publishers`](/api/publishers) | List publishers |
+| `GET` | [`/api/v1/publishers/:id`](/api/publishers) | Get publisher |
+| `POST` | [`/api/v1/publishers/:id/rotate-key`](/api/publishers) | Rotate API key |
+| `DELETE` | [`/api/v1/publishers/:id/revoke`](/api/publishers) | Revoke publisher |
+| `GET` | [`/api/v1/admin/submissions`](/api/admin) | List submissions |
+| `GET` | [`/api/v1/admin/submissions/:id`](/api/admin) | Get submission |
+| `POST` | [`/api/v1/admin/submissions/:id/review`](/api/admin) | Approve/reject submission |
+| `GET` | [`/api/v1/admin/audit-log`](/api/admin) | View audit trail |

@@ -1,0 +1,72 @@
+# Community Submissions
+
+## Submit an Opportunity
+
+```
+POST /api/v1/submit
+```
+
+No authentication required. Rate-limited to **10 requests/minute** per IP.
+
+Submissions are queued for admin review. Approved submissions are converted into full `FundingOpportunity` records.
+
+### Request Body
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `title` | string | Yes | Opportunity title (max 500 chars) |
+| `description` | string | Yes | Full description (Markdown) |
+| `summary` | string | Yes | Plain text summary (max 280 chars) |
+| `rfpType` | enum | Yes | `rfp`, `grant`, `bounty`, `fellowship`, or `hackathon` |
+| `applicationUrl` | URL | Yes | Link to apply |
+| `sourceUrl` | URL | Yes | Where the opportunity was found |
+| `budgetMin` | number | No | Minimum budget |
+| `budgetMax` | number | No | Maximum budget |
+| `currency` | string | No | ISO 4217 currency code (default: `USD`) |
+| `opensAt` | ISO datetime | No | When applications open |
+| `closesAt` | ISO datetime | No | Application deadline |
+| `categories` | string[] | Yes | Topic categories |
+| `ecosystems` | string[] | Yes | Ecosystem tags |
+| `tags` | string[] | Yes | Free-form tags |
+| `submitterEmail` | email | No | Your email (for follow-up) |
+| `submitterName` | string | No | Your name |
+
+### Example
+
+```bash
+curl -X POST 'http://localhost:3000/api/v1/submit' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "title": "DeFi Security Bounty Program",
+    "description": "Bug bounty program for DeFi protocol auditing...",
+    "summary": "Bug bounty for DeFi security",
+    "rfpType": "bounty",
+    "applicationUrl": "https://example.com/bounty",
+    "sourceUrl": "https://example.com/programs",
+    "budgetMin": 500,
+    "budgetMax": 50000,
+    "ecosystems": ["ethereum", "arbitrum"],
+    "categories": ["security", "defi"],
+    "tags": ["audit", "bug-bounty"],
+    "submitterName": "Alice",
+    "submitterEmail": "alice@example.com"
+  }'
+```
+
+### Response
+
+```json
+{
+  "message": "Submission received and queued for review.",
+  "submissionId": "018e1234-5678-7890-abcd-ef1234567890"
+}
+```
+
+### Moderation Flow
+
+1. User submits via `POST /api/v1/submit`
+2. Submission enters `pending` status
+3. Admin reviews at `GET /api/v1/admin/submissions`
+4. Admin approves or rejects via `POST /api/v1/admin/submissions/:id/review`
+5. Approved submissions create a new `FundingOpportunity` record
+6. All actions are logged to the audit trail

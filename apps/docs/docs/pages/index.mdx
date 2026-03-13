@@ -1,0 +1,51 @@
+# What is RFP Hub?
+
+RFP Hub is an **open, neutral aggregation platform** for web3 funding opportunities — grants, RFPs, bounties, fellowships, and hackathons.
+
+## The Problem
+
+Funding opportunities in web3 are scattered across dozens of ecosystem-specific platforms, forum posts, and Twitter threads. Builders waste hours searching for relevant grants, and many opportunities go undiscovered.
+
+## The Solution
+
+RFP Hub aggregates funding opportunities into a single, searchable index with:
+
+- **Automated ingestion** from RSS feeds, DAOIP-5 endpoints, and web scrapers
+- **Full-text search** with filters by type, status, ecosystem, budget, and deadline
+- **Community submissions** with admin moderation
+- **Open standard** ([RFP Object Standard v1.0.0](/standard)) extending DAOIP-5
+- **RSS/Atom feeds** for staying up to date
+- **REST API + TypeScript SDK** for building integrations
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│                  Frontend (Next.js)              │
+└─────────────────────┬───────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────┐
+│                  REST API (Hono)                 │
+│  Search · Filters · Auth · Rate Limiting · ETags│
+└──────┬──────────────┬───────────────────────────┘
+       │              │
+┌──────▼──────┐ ┌─────▼──────┐
+│ PostgreSQL  │ │   Redis    │
+│ FTS + GIN   │ │ Rate Limit │
+└─────────────┘ └────────────┘
+```
+
+## Live
+
+RFP Hub is deployed and running:
+
+- **API**: [`https://rfp-hub-api.fly.dev`](https://rfp-hub-api.fly.dev/health)
+- **Web UI**: [`https://rfp-hub-web.fly.dev`](https://rfp-hub-web.fly.dev)
+- **Docs**: [`https://rfp-hub-docs.fly.dev`](https://rfp-hub-docs.fly.dev)
+
+## Quick Links
+
+- [Getting Started](/getting-started) — curl examples to try right away
+- [API Reference](/api) — full endpoint documentation
+- [RFP Object Standard](/standard) — the data model
+- [TypeScript SDK](/sdk) — client library for Node.js and browsers
