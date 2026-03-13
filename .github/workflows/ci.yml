@@ -59,5 +59,7 @@ jobs:
       - name: Push DB schema and extensions
         run: |
           cd packages/db && npx drizzle-kit push --force
+          cd ../..
+          sudo apt-get install -y -qq postgresql-client > /dev/null
           PGPASSWORD=rfphub psql -h localhost -U rfphub -d rfphub_test -f data/init.sql
       - run: npx turbo test
