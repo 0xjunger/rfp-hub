@@ -65,6 +65,16 @@ afterAll(async () => {
   }
 
   if (createdSourceId) {
+    // Delete any remaining opportunities referencing this source before deleting it
+    const remainingOpps = await db
+      .select({ id: fundingOpportunities.id })
+      .from(fundingOpportunities)
+      .where(eq(fundingOpportunities.sourceId, createdSourceId));
+    const remainingIds = remainingOpps.map((o) => o.id);
+    if (remainingIds.length > 0) {
+      await db.delete(auditLog).where(inArray(auditLog.entityId, remainingIds));
+      await db.delete(fundingOpportunities).where(inArray(fundingOpportunities.id, remainingIds));
+    }
     await db.delete(fundingSources).where(eq(fundingSources.id, createdSourceId));
   }
 });
