@@ -49,10 +49,10 @@ export default async function HomePage({
   const page = params.page ? Number(params.page) : 1;
 
   const { data, meta } = await client.searchOpportunities({
-    q: params.q,
-    type: params.type as any,
+    q: params.q || undefined,
+    type: (params.type as any) || undefined,
     status: (params.status as any) || 'open',
-    ecosystem: params.ecosystem,
+    ecosystem: params.ecosystem || undefined,
     min_budget: params.min_budget ? Number(params.min_budget) : undefined,
     max_budget: params.max_budget ? Number(params.max_budget) : undefined,
     page,

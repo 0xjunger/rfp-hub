@@ -416,11 +416,13 @@ button:disabled {
 
 .search-bar input[type='search'] {
   flex: 1;
+  font-size: 0.75rem;
 }
 
 .search-bar button {
   padding: 0.6rem 1.25rem;
   white-space: nowrap;
+  font-size: 0.75rem;
 }
 
 .filters {
