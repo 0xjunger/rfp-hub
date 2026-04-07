@@ -3,7 +3,6 @@ import { fundingOpportunities, fundingSources } from '@rfp-hub/db';
 import { db } from '../db.js';
 import { checkDuplicate } from '../services/dedup.js';
 import { writeAuditLogBatch } from '../services/audit.js';
-import { fetchRss } from '../services/ingestion/rss-adapter.js';
 import { fetchEfEsp } from '../services/ingestion/ef-esp-adapter.js';
 import { fetchDaoip5 } from '../services/ingestion/daoip5-adapter.js';
 import { normalize } from '../services/ingestion/normalize.js';
@@ -11,7 +10,6 @@ import type { RawOpportunity } from '../services/ingestion/normalize.js';
 import type { IngestionSourceConfig } from '../ingestion-config.js';
 
 const ADAPTER_MAP: Record<string, (config: Record<string, unknown>) => Promise<RawOpportunity[]>> = {
-  rss: fetchRss,
   'ef-esp': fetchEfEsp,
   daoip5: fetchDaoip5,
 };

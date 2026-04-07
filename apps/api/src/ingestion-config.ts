@@ -1,6 +1,6 @@
 export interface IngestionSourceConfig {
   sourceSlug: string;
-  adapterType: 'rss' | 'ef-esp' | 'daoip5';
+  adapterType: 'ef-esp' | 'daoip5';
   config: Record<string, unknown>;
   cron: string;
   enabled: boolean;
