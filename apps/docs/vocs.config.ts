@@ -23,7 +23,6 @@ export default defineConfig({
         { text: 'Opportunities', link: '/api/opportunities' },
         { text: 'Submit', link: '/api/submit' },
         { text: 'Sources', link: '/api/sources' },
-        { text: 'Feeds', link: '/api/feeds' },
         { text: 'Export', link: '/api/export' },
       ],
     },

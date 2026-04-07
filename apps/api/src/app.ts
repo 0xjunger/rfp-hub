@@ -4,7 +4,6 @@ import { logger } from 'hono/logger';
 import { opportunitiesRoute } from './routes/opportunities.js';
 import { sourcesRoute } from './routes/sources.js';
 import { submitRoute } from './routes/submit.js';
-import { feedRoute } from './routes/feed.js';
 import { healthRoute } from './routes/health.js';
 import { schemaRoute } from './routes/schema.js';
 import { exportRoute } from './routes/export.js';
@@ -29,7 +28,6 @@ app.use(
 
 // Rate limiting
 app.use('/api/*', rateLimit({ windowMs: 60_000, max: 100, keyPrefix: 'api' }));
-app.use('/feed/*', rateLimit({ windowMs: 60_000, max: 100, keyPrefix: 'feed' }));
 app.use('/api/v1/submit', rateLimit({ windowMs: 60_000, max: 10, keyPrefix: 'submit' }));
 app.use('/api/v1/bulk-import/*', rateLimit({ windowMs: 60_000, max: 5, keyPrefix: 'bulk-import' }));
 app.use('/api/v1/admin/*', rateLimit({ windowMs: 60_000, max: 100, keyPrefix: 'admin' }));
@@ -42,7 +40,6 @@ app.route('/api/v1/export', exportRoute);
 app.route('/api/v1/publishers', publishersRoute);
 app.route('/api/v1/bulk-import', bulkImportRoute);
 app.route('/api/v1/admin', adminRoute);
-app.route('/feed', feedRoute);
 app.route('/health', healthRoute);
 app.route('/api/v1/schema', schemaRoute);
 
@@ -75,7 +72,6 @@ app.get('/', (c) =>
       sources: '/api/v1/sources',
       submit: '/api/v1/submit',
       export: '/api/v1/export',
-      feeds: { rss: '/feed/rss', atom: '/feed/atom' },
       health: '/health',
       openapi: '/api/v1/openapi',
       schema: '/api/v1/schema',

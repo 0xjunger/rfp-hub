@@ -13,14 +13,6 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        <link
-          rel="alternate"
-          type="application/rss+xml"
-          title="RFP Hub RSS"
-          href={`${process.env.NEXT_PUBLIC_API_URL || 'https://rfp-hub-api.fly.dev'}/feed/rss`}
-        />
-      </head>
       <body>
         <header className="site-header">
           <nav>
@@ -38,8 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="site-footer-inner">
             <span>RFP Hub</span>
             <div className="site-footer-links">
-              <a href={`${process.env.NEXT_PUBLIC_API_URL || 'https://rfp-hub-api.fly.dev'}/feed/rss`}>RSS</a>
-              <a href={process.env.NEXT_PUBLIC_DOCS_URL || 'https://rfp-hub-docs.fly.dev'} target="_blank" rel="noopener noreferrer">
+<a href={process.env.NEXT_PUBLIC_DOCS_URL || 'https://rfp-hub-docs.fly.dev'} target="_blank" rel="noopener noreferrer">
                 Docs
               </a>
               <a

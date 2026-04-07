@@ -222,17 +222,6 @@ describe('Export', () => {
   });
 });
 
-describe('Feeds', () => {
-  it('GET /feed/rss → valid RSS XML', async () => {
-    const res = await req('/feed/rss');
-    expect(res.status).toBe(200);
-    expect(res.headers.get('content-type')).toContain('application/rss+xml');
-    const text = await res.text();
-    expect(text).toContain('<rss');
-    expect(text).toContain('<channel>');
-  });
-});
-
 describe('Rate Limiting', () => {
   it('responses include rate limit headers', async () => {
     const res = await req('/api/v1/opportunities?limit=1');
