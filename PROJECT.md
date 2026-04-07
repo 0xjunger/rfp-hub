@@ -1,6 +1,6 @@
 # RFP Hub — Complete Project Reference
 
-**Last updated:** 2026-03-13
+**Last updated:** 2026-03-15
 **Status:** Production (all milestones complete, 35/35 tests passing)
 **License:** MIT (code) + CC0 (RFP Object Standard)
 
@@ -29,6 +29,7 @@
 19. [Seeded Data](#19-seeded-data)
 20. [Milestone History](#20-milestone-history)
 21. [File Index](#21-file-index)
+22. [Post-Launch Fixes](#22-post-launch-fixes-2026-03-13--2026-03-15)
 
 ---
 
@@ -867,7 +868,7 @@ The docs build is included in the CI build step.
 | `NODE_ENV` | No | All | `development` or `production` |
 | `API_URL` | Yes (web) | Web | Internal API URL for SSR |
 | `NEXT_PUBLIC_API_URL` | No | Web | Public API URL (client-side) |
-| `NEXT_PUBLIC_DOCS_URL` | No | Web | Docs site URL (default: `https://docs.rfphub.org`) |
+| `NEXT_PUBLIC_DOCS_URL` | No | Web | Docs site URL (default: `https://rfp-hub-docs.fly.dev`) |
 
 ---
 
@@ -1064,3 +1065,42 @@ Status breakdown: 21 open, 2 closed
 |---|---|
 | `docs/standard/v1.0.0.md` | RFP Object Standard specification |
 | `docs/PROGRESS.md` | Milestone tracking & history |
+
+---
+
+## 22. Post-Launch Fixes (2026-03-13 → 2026-03-15)
+
+Fixes applied after initial production deploy (M5).
+
+### CI/CD Stabilization
+
+| Commit | Fix |
+|---|---|
+| `28fedf2` | Remove `--env-file` from test script; replace `next lint` with `tsc` |
+| `13e3085` | Add `--passWithNoTests` to packages without test files |
+| `0f5a07e` | Pass `DATABASE_URL` and `REDIS_URL` through turbo to test tasks |
+| `3e98ec9` | Push DB schema before running tests |
+| `ae2d04a` | Run `init.sql` after drizzle push for `pg_trgm` extension and indexes |
+| `ffd71d0` | Install `postgresql-client` for `init.sql` execution in CI |
+| `a87170c` | Fix test cleanup: delete opportunities before funding source (FK order) |
+| `d09f42c` | Make `api.test.ts` and `m3.test.ts` self-contained (no cross-test deps) |
+
+### Bug Fixes
+
+| Commit | Fix |
+|---|---|
+| `237eace` | Fix search crash caused by malformed query; match search bar sizing to filter dropdowns |
+| `f55f7a3` | Fix search bar and button height mismatch with filter dropdowns — `.filters` now uses `display: contents` so all controls share the same flex row and height |
+
+### Deployment Fixes
+
+| Commit | Fix |
+|---|---|
+| `631596c` | Add `API_URL` to `fly.web.toml` (server-side data fetching was hitting `localhost`); add `NEXT_PUBLIC_DOCS_URL` as Dockerfile build `ARG`+`ENV` (Next.js inlines `NEXT_PUBLIC_*` at build time, not runtime) |
+| `bd05839`, `f3a2051` | Fix docs link — was pointing to OpenAPI endpoint, now points to actual docs site (`https://rfp-hub-docs.fly.dev`) across `layout.tsx`, `Dockerfile`, `fly.web.toml`, and `.env.example` |
+
+### Key Lessons
+
+- **`NEXT_PUBLIC_*` env vars must be set at build time** — setting them in `fly.web.toml` `[env]` (runtime) has no effect. Use Dockerfile `ARG`/`ENV` before the build step.
+- **Fly.io can overwrite CI deploys** — if a manual `fly deploy` runs after CI, the CI image gets replaced. Always deploy via CI only.
+- **`API_URL` is needed for SSR** — Next.js server components use `API_URL` to reach the API; without it, they fall back to `localhost:3000`.
