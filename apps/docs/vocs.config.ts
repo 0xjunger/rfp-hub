@@ -25,9 +25,6 @@ export default defineConfig({
         { text: 'Sources', link: '/api/sources' },
         { text: 'Feeds', link: '/api/feeds' },
         { text: 'Export', link: '/api/export' },
-        { text: 'Publishers', link: '/api/publishers' },
-        { text: 'Bulk Import', link: '/api/bulk-import' },
-        { text: 'Admin', link: '/api/admin' },
       ],
     },
     {
