@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 Docs
               </a>
               <a
-                href="https://github.com/junger/rfp-hub"
+                href="https://github.com/0xjunger/rfp-hub"
                 target="_blank"
                 rel="noopener noreferrer"
               >
