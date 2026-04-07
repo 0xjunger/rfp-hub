@@ -40,7 +40,7 @@ const getRoute = createRoute({
   method: 'get',
   path: '/:id',
   request: {
-    params: z.object({ id: z.string().uuid() }),
+    params: z.object({ id: z.string() }),
   },
   responses: {
     200: {
@@ -57,6 +57,10 @@ const getRoute = createRoute({
 
 sourcesRoute.openapi(getRoute, async (c) => {
   const { id } = c.req.valid('param');
+
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return c.json({ error: 'Source not found' }, 404);
+  }
 
   const results = await db
     .select()

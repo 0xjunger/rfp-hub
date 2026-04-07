@@ -3,7 +3,9 @@ import { fundingOpportunities } from '@rfp-hub/db';
 import { exportOpportunitiesSchema, fundingOpportunitySchema } from '@rfp-hub/schema';
 import { db } from '../db.js';
 import { buildOpportunityFilters } from '../lib/build-filters.js';
-import { desc } from 'drizzle-orm';
+import { desc, getTableColumns } from 'drizzle-orm';
+
+const { searchVector: _sv, ...opportunityColumns } = getTableColumns(fundingOpportunities);
 import type { AppEnv } from '../types.js';
 
 export const exportRoute = new OpenAPIHono<AppEnv>();
@@ -61,7 +63,7 @@ exportRoute.openapi(exportListRoute, async (c) => {
   const where = await buildOpportunityFilters(query);
 
   const results = await db
-    .select()
+    .select(opportunityColumns)
     .from(fundingOpportunities)
     .where(where)
     .orderBy(desc(fundingOpportunities.createdAt))

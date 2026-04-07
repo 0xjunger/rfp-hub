@@ -1,7 +1,9 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { Feed } from 'feed';
-import { desc, eq, and } from 'drizzle-orm';
+import { desc, eq, and, getTableColumns } from 'drizzle-orm';
 import { fundingOpportunities } from '@rfp-hub/db';
+
+const { searchVector: _sv, ...opportunityColumns } = getTableColumns(fundingOpportunities);
 import { db } from '../db.js';
 import type { AppEnv } from '../types.js';
 
@@ -19,7 +21,7 @@ async function buildFeed(format: 'rss' | 'atom') {
   });
 
   const opportunities = await db
-    .select()
+    .select(opportunityColumns)
     .from(fundingOpportunities)
     .where(and(eq(fundingOpportunities.isActive, true), eq(fundingOpportunities.status, 'open')))
     .orderBy(desc(fundingOpportunities.createdAt))

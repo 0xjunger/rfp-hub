@@ -133,22 +133,9 @@ GET /api/v1/openapi
 
 ### Authenticated (API Key)
 
+Write endpoints require an `X-API-Key` header. See the [OpenAPI spec](/api/v1/openapi) for the full authenticated and admin endpoint reference.
+
 | Method | Path | Description |
 |---|---|---|
 | `POST` | [`/api/v1/opportunities`](/api/opportunities) | Create opportunity |
 | `PUT` | [`/api/v1/opportunities/:id`](/api/opportunities) | Update opportunity |
-| `POST` | [`/api/v1/bulk-import`](/api/bulk-import) | Bulk import with dedup |
-
-### Admin Only
-
-| Method | Path | Description |
-|---|---|---|
-| `POST` | [`/api/v1/publishers`](/api/publishers) | Create publisher |
-| `GET` | [`/api/v1/publishers`](/api/publishers) | List publishers |
-| `GET` | [`/api/v1/publishers/:id`](/api/publishers) | Get publisher |
-| `POST` | [`/api/v1/publishers/:id/rotate-key`](/api/publishers) | Rotate API key |
-| `DELETE` | [`/api/v1/publishers/:id/revoke`](/api/publishers) | Revoke publisher |
-| `GET` | [`/api/v1/admin/submissions`](/api/admin) | List submissions |
-| `GET` | [`/api/v1/admin/submissions/:id`](/api/admin) | Get submission |
-| `POST` | [`/api/v1/admin/submissions/:id/review`](/api/admin) | Approve/reject submission |
-| `GET` | [`/api/v1/admin/audit-log`](/api/admin) | View audit trail |

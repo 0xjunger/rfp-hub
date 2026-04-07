@@ -247,3 +247,60 @@ describe('Rate Limiting', () => {
     }
   });
 });
+
+describe('Sort', () => {
+  it('GET /api/v1/opportunities?sort=budget_min:asc → 200', async () => {
+    const res = await req('/api/v1/opportunities?sort=budget_min:asc');
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.data).toBeInstanceOf(Array);
+  });
+
+  it('GET /api/v1/opportunities?sort=budget_min:desc → 200', async () => {
+    const res = await req('/api/v1/opportunities?sort=budget_min:desc');
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.data).toBeInstanceOf(Array);
+  });
+
+  it('GET /api/v1/opportunities?sort=invalid_field:asc → 400', async () => {
+    const res = await req('/api/v1/opportunities?sort=invalid_field:asc');
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('Invalid UUID handling', () => {
+  it('GET /api/v1/opportunities/not-a-uuid → 404', async () => {
+    const res = await req('/api/v1/opportunities/not-a-uuid');
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body.error).toBeDefined();
+  });
+
+  it('GET /api/v1/sources/not-a-uuid → 404', async () => {
+    const res = await req('/api/v1/sources/not-a-uuid');
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body.error).toBeDefined();
+  });
+});
+
+describe('Response shape', () => {
+  it('GET /api/v1/opportunities → searchVector not present in response', async () => {
+    const res = await req('/api/v1/opportunities?limit=1');
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.data[0]).not.toHaveProperty('searchVector');
+  });
+
+  it('GET /api/v1/opportunities/:id → searchVector not present in response', async () => {
+    const listRes = await req('/api/v1/opportunities?limit=1');
+    const listBody = await listRes.json();
+    const id = listBody.data[0]?.id;
+
+    const res = await req(`/api/v1/opportunities/${id}`);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body).not.toHaveProperty('searchVector');
+  });
+});

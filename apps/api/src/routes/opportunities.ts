@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { eq, and, sql, desc, asc } from 'drizzle-orm';
+import { eq, and, sql, desc, asc, getTableColumns } from 'drizzle-orm';
 import { fundingOpportunities } from '@rfp-hub/db';
 import {
   fundingOpportunitySchema,
@@ -15,6 +15,9 @@ import { writeAuditLog } from '../services/audit.js';
 import type { AppEnv } from '../types.js';
 
 export const opportunitiesRoute = new OpenAPIHono<AppEnv>();
+
+// Columns to select — excludes internal searchVector field
+const { searchVector: _sv, ...opportunityColumns } = getTableColumns(fundingOpportunities);
 
 // --- List / Search ---
 const listRoute = createRoute({
@@ -62,9 +65,11 @@ opportunitiesRoute.openapi(listRoute, async (c) => {
       ? fundingOpportunities.closesAt
       : sortField === 'budget_max'
         ? fundingOpportunities.budgetMax
-        : sortField === 'title'
-          ? fundingOpportunities.title
-          : fundingOpportunities.createdAt;
+        : sortField === 'budget_min'
+          ? fundingOpportunities.budgetMin
+          : sortField === 'title'
+            ? fundingOpportunities.title
+            : fundingOpportunities.createdAt;
 
   // FTS relevance sort: when ?q= is provided and default sort is used
   const useRelevanceSort = !!query.q && sort === 'created_at:desc';
@@ -82,9 +87,11 @@ opportunitiesRoute.openapi(listRoute, async (c) => {
         ? 'closes_at'
         : sortField === 'budget_max'
           ? 'budget_max'
-          : sortField === 'title'
-            ? 'title'
-            : 'created_at';
+          : sortField === 'budget_min'
+            ? 'budget_min'
+            : sortField === 'title'
+              ? 'title'
+              : 'created_at';
 
     cursorCondition =
       sortDir === 'asc'
@@ -98,7 +105,7 @@ opportunitiesRoute.openapi(listRoute, async (c) => {
 
   const [results, countResult] = await Promise.all([
     db
-      .select()
+      .select(opportunityColumns)
       .from(fundingOpportunities)
       .where(finalWhere)
       .orderBy(orderBy)
@@ -157,7 +164,7 @@ const getRoute = createRoute({
   method: 'get',
   path: '/:id',
   request: {
-    params: z.object({ id: z.string().uuid() }),
+    params: z.object({ id: z.string() }),
   },
   responses: {
     200: {
@@ -175,8 +182,12 @@ const getRoute = createRoute({
 opportunitiesRoute.openapi(getRoute, async (c) => {
   const { id } = c.req.valid('param');
 
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return c.json({ error: 'Opportunity not found' }, 404);
+  }
+
   const results = await db
-    .select()
+    .select(opportunityColumns)
     .from(fundingOpportunities)
     .where(and(eq(fundingOpportunities.id, id), eq(fundingOpportunities.isActive, true)))
     .limit(1);
@@ -237,7 +248,7 @@ const updateOppRoute = createRoute({
   method: 'put',
   path: '/:id',
   request: {
-    params: z.object({ id: z.string().uuid() }),
+    params: z.object({ id: z.string() }),
     body: {
       content: { 'application/json': { schema: updateOpportunitySchema } },
     },
@@ -259,6 +270,11 @@ const updateOppRoute = createRoute({
 
 opportunitiesRoute.openapi(updateOppRoute, async (c) => {
   const { id } = c.req.valid('param');
+
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return c.json({ error: 'Opportunity not found' }, 404);
+  }
+
   const body = c.req.valid('json');
 
   const updateData: Record<string, unknown> = { ...body };

@@ -26,4 +26,4 @@ COPY --from=base /app/apps/docs/docs/dist ./dist
 ENV PORT=3000
 EXPOSE 3000
 
-CMD ["serve", "dist", "-l", "3000", "-s"]
+CMD ["serve", "dist", "-l", "3000"]

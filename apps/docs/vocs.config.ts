@@ -6,7 +6,7 @@ export default defineConfig({
   topNav: [
     { text: 'API', link: '/api' },
     { text: 'Standard', link: '/standard' },
-    { text: 'GitHub', link: 'https://github.com/junger/rfp-hub' },
+    { text: 'GitHub', link: 'https://github.com/0xjunger/rfp-hub' },
   ],
   sidebar: [
     {
