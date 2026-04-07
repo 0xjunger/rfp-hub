@@ -58,5 +58,28 @@ app.doc('/api/v1/openapi', {
       name: 'MIT',
     },
   },
-  servers: [{ url: 'http://localhost:3000', description: 'Development' }],
+  servers: [
+    { url: 'https://rfp-hub-api.fly.dev', description: 'Production' },
+    { url: 'http://localhost:3000', description: 'Development' },
+  ],
 });
+
+// API root — service discovery
+app.get('/', (c) =>
+  c.json({
+    name: 'RFP Hub API',
+    version: '1.0.0',
+    description: 'Open, neutral aggregation platform for web3 funding opportunities.',
+    endpoints: {
+      opportunities: '/api/v1/opportunities',
+      sources: '/api/v1/sources',
+      submit: '/api/v1/submit',
+      export: '/api/v1/export',
+      feeds: { rss: '/feed/rss', atom: '/feed/atom' },
+      health: '/health',
+      openapi: '/api/v1/openapi',
+      schema: '/api/v1/schema',
+    },
+    docs: 'https://rfp-hub-docs.fly.dev',
+  }),
+);
