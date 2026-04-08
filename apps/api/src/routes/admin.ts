@@ -1,12 +1,7 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { submissions, fundingOpportunities, fundingSources, auditLog } from '@rfp-hub/db';
-import {
-  submissionSchema,
-  reviewSubmissionSchema,
-  listSubmissionsSchema,
-  fundingOpportunitySchema,
-} from '@rfp-hub/schema';
+import { submissionSchema, reviewSubmissionSchema, listSubmissionsSchema } from '@rfp-hub/schema';
 import { db } from '../db.js';
 import { requireAdmin } from '../middleware/auth.js';
 import { writeAuditLog } from '../services/audit.js';
@@ -52,8 +47,17 @@ adminRoute.openapi(listSubmissionsRoute, async (c) => {
   const where = status ? eq(submissions.status, status) : undefined;
 
   const [results, countResult] = await Promise.all([
-    db.select().from(submissions).where(where).orderBy(desc(submissions.createdAt)).limit(limit).offset(offset),
-    db.select({ count: sql<number>`count(*)::int` }).from(submissions).where(where),
+    db
+      .select()
+      .from(submissions)
+      .where(where)
+      .orderBy(desc(submissions.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(submissions)
+      .where(where),
   ]);
 
   return c.json({
@@ -219,7 +223,10 @@ adminRoute.openapi(reviewRoute, async (c) => {
     performedBy: publisherId,
   });
 
-  return c.json({ message: 'Submission approved. Opportunity created.', opportunityId: opp.id } as any);
+  return c.json({
+    message: 'Submission approved. Opportunity created.',
+    opportunityId: opp.id,
+  } as any);
 });
 
 // --- Audit Log Viewer ---
@@ -240,15 +247,17 @@ const auditLogRoute = createRoute({
       content: {
         'application/json': {
           schema: z.object({
-            data: z.array(z.object({
-              id: z.string().uuid(),
-              entityType: z.string(),
-              entityId: z.string().uuid(),
-              action: z.string(),
-              changes: z.any().nullable(),
-              performedBy: z.string(),
-              performedAt: z.coerce.date(),
-            })),
+            data: z.array(
+              z.object({
+                id: z.string().uuid(),
+                entityType: z.string(),
+                entityId: z.string().uuid(),
+                action: z.string(),
+                changes: z.any().nullable(),
+                performedBy: z.string(),
+                performedAt: z.coerce.date(),
+              }),
+            ),
             meta: z.object({ total: z.number(), page: z.number(), limit: z.number() }),
           }),
         },
@@ -271,8 +280,17 @@ adminRoute.openapi(auditLogRoute, async (c) => {
   const where = conditions.length > 0 ? and(...conditions) : undefined;
 
   const [results, countResult] = await Promise.all([
-    db.select().from(auditLog).where(where).orderBy(desc(auditLog.performedAt)).limit(limit).offset(offset),
-    db.select({ count: sql<number>`count(*)::int` }).from(auditLog).where(where),
+    db
+      .select()
+      .from(auditLog)
+      .where(where)
+      .orderBy(desc(auditLog.performedAt))
+      .limit(limit)
+      .offset(offset),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(auditLog)
+      .where(where),
   ]);
 
   return c.json({

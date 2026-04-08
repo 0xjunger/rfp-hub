@@ -1,6 +1,6 @@
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import { submissions } from '@rfp-hub/db';
-import { createSubmissionSchema, submissionSchema } from '@rfp-hub/schema';
+import { createSubmissionSchema } from '@rfp-hub/schema';
 import { db } from '../db.js';
 import { writeAuditLog } from '../services/audit.js';
 import type { AppEnv } from '../types.js';

@@ -23,7 +23,6 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@rfp-hub/schema": "*",
     "drizzle-orm": "^0.38.0",
     "postgres": "^3.4.0"
   },

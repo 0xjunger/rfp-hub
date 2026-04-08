@@ -18,14 +18,14 @@ export interface RawOpportunity {
   contactEmail?: string | null;
 }
 
-export interface IngestionResult {
+interface IngestionResult {
   fetched: number;
   imported: number;
   duplicates: number;
   errors: string[];
 }
 
-export function slugify(title: string): string {
+function slugify(title: string): string {
   return (
     title
       .toLowerCase()

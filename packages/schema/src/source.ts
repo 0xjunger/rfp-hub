@@ -3,7 +3,11 @@ import { z } from 'zod';
 export const fundingSourceSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1).max(255),
-  slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/),
+  slug: z
+    .string()
+    .min(1)
+    .max(255)
+    .regex(/^[a-z0-9-]+$/),
   description: z.string().max(2000).nullable(),
   websiteUrl: z.string().url().nullable(),
   logoUrl: z.string().url().nullable(),
@@ -14,14 +18,4 @@ export const fundingSourceSchema = z.object({
   updatedAt: z.coerce.date(),
 });
 
-export const createFundingSourceSchema = fundingSourceSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const updateFundingSourceSchema = createFundingSourceSchema.partial();
-
 export type FundingSource = z.infer<typeof fundingSourceSchema>;
-export type CreateFundingSource = z.infer<typeof createFundingSourceSchema>;
-export type UpdateFundingSource = z.infer<typeof updateFundingSourceSchema>;

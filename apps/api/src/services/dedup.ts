@@ -2,7 +2,7 @@ import { eq, sql, or } from 'drizzle-orm';
 import { fundingOpportunities } from '@rfp-hub/db';
 import { db } from '../db.js';
 
-export interface DuplicateCheckResult {
+interface DuplicateCheckResult {
   isDuplicate: boolean;
   matchType: 'url' | 'fuzzy' | null;
   matchedId: string | null;

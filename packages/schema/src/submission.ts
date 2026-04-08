@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { rfpTypeEnum } from './opportunity.js';
 
-export const submissionStatusEnum = z.enum(['pending', 'approved', 'rejected']);
+const submissionStatusEnum = z.enum(['pending', 'approved', 'rejected']);
 
 export const submissionSchema = z.object({
   id: z.string().uuid(),
@@ -65,7 +65,4 @@ export const listSubmissionsSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),
 });
 
-export type Submission = z.infer<typeof submissionSchema>;
 export type CreateSubmission = z.infer<typeof createSubmissionSchema>;
-export type ReviewSubmission = z.infer<typeof reviewSubmissionSchema>;
-export type ListSubmissions = z.infer<typeof listSubmissionsSchema>;

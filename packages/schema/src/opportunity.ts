@@ -2,21 +2,19 @@ import { z } from 'zod';
 
 export const rfpTypeEnum = z.enum(['rfp', 'grant', 'bounty', 'fellowship', 'hackathon']);
 
-export const opportunityStatusEnum = z.enum([
-  'draft',
-  'open',
-  'closing_soon',
-  'closed',
-  'awarded',
-]);
+export const opportunityStatusEnum = z.enum(['draft', 'open', 'closing_soon', 'closed', 'awarded']);
 
-export const publisherTypeEnum = z.enum(['community', 'verified_publisher']);
+const publisherTypeEnum = z.enum(['community', 'verified_publisher']);
 
 export const fundingOpportunitySchema = z.object({
   // Identity
   id: z.string().uuid(),
   externalId: z.string().max(500).nullable(),
-  slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/),
+  slug: z
+    .string()
+    .min(1)
+    .max(255)
+    .regex(/^[a-z0-9-]+$/),
 
   // Content
   title: z.string().min(1).max(500),
@@ -132,8 +130,6 @@ export const exportOpportunitiesSchema = z.object({
   limit: z.coerce.number().int().min(1).max(10000).default(10000),
 });
 
-export type ExportOpportunities = z.infer<typeof exportOpportunitiesSchema>;
-
 export const bulkImportSchema = z.object({
   opportunities: z.array(createOpportunitySchema).min(1).max(100),
 });
@@ -144,11 +140,7 @@ export const bulkImportResponseSchema = z.object({
   errors: z.array(z.object({ index: z.number(), message: z.string() })),
 });
 
-export type BulkImport = z.infer<typeof bulkImportSchema>;
-export type BulkImportResponse = z.infer<typeof bulkImportResponseSchema>;
 export type FundingOpportunity = z.infer<typeof fundingOpportunitySchema>;
 export type CreateOpportunity = z.infer<typeof createOpportunitySchema>;
 export type UpdateOpportunity = z.infer<typeof updateOpportunitySchema>;
 export type SearchOpportunities = z.infer<typeof searchOpportunitiesSchema>;
-export type RfpType = z.infer<typeof rfpTypeEnum>;
-export type OpportunityStatus = z.infer<typeof opportunityStatusEnum>;
