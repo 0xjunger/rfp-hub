@@ -50,7 +50,7 @@ npm test  # 41 tests (requires DATABASE_URL + REDIS_URL in .env)
 
 ## Documentation
 
-Full API reference, SDK docs, and the RFP Object Standard are available at the [docs site](https://rfp-hub-docs.fly.dev/).
+Full API reference, SDK docs, and the RFP Object Standard are available at the [docs site](https://rfp-hub-docs.pages.dev/).
 
 ## License
 

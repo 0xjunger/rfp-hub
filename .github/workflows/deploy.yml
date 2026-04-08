@@ -30,11 +30,10 @@ jobs:
             web:
               - 'apps/web/**'
               - 'packages/**'
+              - 'apps/web/Dockerfile'
               - 'fly.web.toml'
             docs:
               - 'apps/docs/**'
-              - 'packages/**'
-              - 'fly.docs.toml'
 
   deploy-api:
     needs: changes
@@ -64,7 +63,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --config fly.docs.toml --remote-only
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npx turbo build --filter=@rfp-hub/docs
+      - run: npx wrangler pages deploy apps/docs/docs/dist --project-name=rfp-hub-docs
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

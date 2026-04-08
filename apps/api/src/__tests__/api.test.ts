@@ -91,11 +91,14 @@ afterAll(async () => {
 });
 
 describe('Health', () => {
-  it('GET /health → 200 with status ok', async () => {
+  it('GET /health → 200 with status ok and DB check', async () => {
     const res = await req('/health');
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.status).toBe('ok');
+    expect(body.timestamp).toBeDefined();
+    expect(body.version).toBeDefined();
+    expect(body.db).toBeUndefined();
   });
 });
 
@@ -134,9 +137,7 @@ describe('Opportunities', () => {
     const body = await res.json();
     for (const opp of body.data) {
       expect(
-        (opp.ecosystems as string[]).some((e: string) =>
-          e.toLowerCase().includes('arbitrum'),
-        ),
+        (opp.ecosystems as string[]).some((e: string) => e.toLowerCase().includes('arbitrum')),
       ).toBe(true);
     }
   });

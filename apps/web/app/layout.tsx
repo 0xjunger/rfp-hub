@@ -20,7 +20,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               RFP Hub
             </a>
             <a href="/submit">Submit</a>
-            <a href={process.env.NEXT_PUBLIC_DOCS_URL || 'https://rfp-hub-docs.fly.dev'} target="_blank" rel="noopener noreferrer">
+            <a
+              href={process.env.NEXT_PUBLIC_DOCS_URL || 'https://rfp-hub-docs.pages.dev'}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Docs
             </a>
           </nav>
@@ -30,7 +34,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="site-footer-inner">
             <span>RFP Hub</span>
             <div className="site-footer-links">
-<a href={process.env.NEXT_PUBLIC_DOCS_URL || 'https://rfp-hub-docs.fly.dev'} target="_blank" rel="noopener noreferrer">
+              <a
+                href={process.env.NEXT_PUBLIC_DOCS_URL || 'https://rfp-hub-docs.pages.dev'}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Docs
               </a>
               <a

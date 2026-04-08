@@ -17,10 +17,15 @@ export const app = new OpenAPIHono<AppEnv>();
 
 // Global middleware
 app.use('*', logger());
+
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS ?? '').split(',').filter(Boolean).length
+  ? (process.env.CORS_ORIGINS ?? '').split(',').filter(Boolean)
+  : ['https://rfp-hub.fly.dev', 'http://localhost:3001'];
+
 app.use(
   '*',
   cors({
-    origin: '*',
+    origin: ALLOWED_ORIGINS,
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization', 'X-API-Key'],
   }),
@@ -76,6 +81,6 @@ app.get('/', (c) =>
       openapi: '/api/v1/openapi',
       schema: '/api/v1/schema',
     },
-    docs: 'https://rfp-hub-docs.fly.dev',
+    docs: 'https://rfp-hub-docs.pages.dev',
   }),
 );

@@ -13,7 +13,9 @@ RUN npm install
 
 # Build
 COPY . .
-ARG NEXT_PUBLIC_DOCS_URL="https://rfp-hub-docs.fly.dev"
+ARG NEXT_PUBLIC_API_URL="https://rfp-hub-api.fly.dev"
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_DOCS_URL="https://rfp-hub-docs.pages.dev"
 ENV NEXT_PUBLIC_DOCS_URL=$NEXT_PUBLIC_DOCS_URL
 RUN npx turbo build --filter=@rfp-hub/web...
 
