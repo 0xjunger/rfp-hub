@@ -67,9 +67,11 @@ opportunitiesRoute.openapi(listRoute, async (c) => {
         ? fundingOpportunities.budgetMax
         : sortField === 'budget_min'
           ? fundingOpportunities.budgetMin
-          : sortField === 'title'
-            ? fundingOpportunities.title
-            : fundingOpportunities.createdAt;
+          : sortField === 'prize_pool'
+            ? fundingOpportunities.prizePool
+            : sortField === 'title'
+              ? fundingOpportunities.title
+              : fundingOpportunities.createdAt;
 
   // FTS relevance sort: when ?q= is provided and default sort is used
   const useRelevanceSort = !!query.q && sort === 'created_at:desc';
@@ -89,9 +91,11 @@ opportunitiesRoute.openapi(listRoute, async (c) => {
           ? 'budget_max'
           : sortField === 'budget_min'
             ? 'budget_min'
-            : sortField === 'title'
-              ? 'title'
-              : 'created_at';
+            : sortField === 'prize_pool'
+              ? 'prize_pool'
+              : sortField === 'title'
+                ? 'title'
+                : 'created_at';
 
     cursorCondition =
       sortDir === 'asc'
@@ -99,9 +103,7 @@ opportunitiesRoute.openapi(listRoute, async (c) => {
         : sql`(${sql.raw(sortColName)}, id) < (SELECT ${sql.raw(sortColName)}, id FROM funding_opportunities WHERE id = ${cursor})`;
   }
 
-  const finalWhere = cursorCondition
-    ? and(where, cursorCondition)
-    : where;
+  const finalWhere = cursorCondition ? and(where, cursorCondition) : where;
 
   const [results, countResult] = await Promise.all([
     db
@@ -226,8 +228,10 @@ opportunitiesRoute.openapi(createOppRoute, async (c) => {
     .insert(fundingOpportunities)
     .values({
       ...body,
+      submittedBy: c.get('publisherId') ?? body.submittedBy,
       budgetMin: body.budgetMin != null ? String(body.budgetMin) : null,
       budgetMax: body.budgetMax != null ? String(body.budgetMax) : null,
+      prizePool: body.prizePool != null ? String(body.prizePool) : null,
       submittedAt: body.submittedAt ?? new Date(),
     })
     .returning();
@@ -259,6 +263,10 @@ const updateOppRoute = createRoute({
       content: { 'application/json': { schema: fundingOpportunitySchema } },
       description: 'Updated opportunity',
     },
+    403: {
+      content: { 'application/json': { schema: z.object({ error: z.string() }) } },
+      description: 'Forbidden — not the owner',
+    },
     404: {
       content: { 'application/json': { schema: z.object({ error: z.string() }) } },
       description: 'Not found',
@@ -270,16 +278,38 @@ const updateOppRoute = createRoute({
 
 opportunitiesRoute.openapi(updateOppRoute, async (c) => {
   const { id } = c.req.valid('param');
+  const publisherId = c.get('publisherId');
+  const publisherRole = c.get('publisherRole');
 
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
     return c.json({ error: 'Opportunity not found' }, 404);
   }
 
+  if (publisherRole !== 'admin') {
+    const existing = await db
+      .select({ submittedBy: fundingOpportunities.submittedBy })
+      .from(fundingOpportunities)
+      .where(eq(fundingOpportunities.id, id))
+      .limit(1);
+
+    if (existing.length === 0) {
+      return c.json({ error: 'Opportunity not found' }, 404);
+    }
+
+    if (existing[0].submittedBy !== publisherId) {
+      return c.json({ error: 'Not authorized to update this opportunity' }, 403);
+    }
+  }
+
   const body = c.req.valid('json');
 
   const updateData: Record<string, unknown> = { ...body };
-  if (body.budgetMin !== undefined) updateData.budgetMin = body.budgetMin != null ? String(body.budgetMin) : null;
-  if (body.budgetMax !== undefined) updateData.budgetMax = body.budgetMax != null ? String(body.budgetMax) : null;
+  if (body.budgetMin !== undefined)
+    updateData.budgetMin = body.budgetMin != null ? String(body.budgetMin) : null;
+  if (body.budgetMax !== undefined)
+    updateData.budgetMax = body.budgetMax != null ? String(body.budgetMax) : null;
+  if (body.prizePool !== undefined)
+    updateData.prizePool = body.prizePool != null ? String(body.prizePool) : null;
 
   const result = await db
     .update(fundingOpportunities)
@@ -296,7 +326,7 @@ opportunitiesRoute.openapi(updateOppRoute, async (c) => {
     entityId: id,
     action: 'update',
     changes: body as Record<string, unknown>,
-    performedBy: c.get('publisherId') ?? 'api',
+    performedBy: publisherId ?? 'api',
   });
 
   return c.json(result[0] as any);

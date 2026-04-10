@@ -3,7 +3,7 @@ import { eq, desc, and, sql } from 'drizzle-orm';
 import { submissions, fundingOpportunities, fundingSources, auditLog } from '@rfp-hub/db';
 import { submissionSchema, reviewSubmissionSchema, listSubmissionsSchema } from '@rfp-hub/schema';
 import { db } from '../db.js';
-import { requireAdmin } from '../middleware/auth.js';
+import { requireApiKey, requireAdmin } from '../middleware/auth.js';
 import { writeAuditLog } from '../services/audit.js';
 import type { AppEnv } from '../types.js';
 
@@ -22,7 +22,7 @@ const listSubmissionsRoute = createRoute({
   method: 'get',
   path: '/submissions',
   request: { query: listSubmissionsSchema },
-  middleware: [requireAdmin],
+  middleware: [requireApiKey, requireAdmin],
   responses: {
     200: {
       content: {
@@ -71,7 +71,7 @@ const getSubmissionRoute = createRoute({
   method: 'get',
   path: '/submissions/:id',
   request: { params: z.object({ id: z.string().uuid() }) },
-  middleware: [requireAdmin],
+  middleware: [requireApiKey, requireAdmin],
   responses: {
     200: {
       content: { 'application/json': { schema: submissionSchema } },
@@ -101,7 +101,7 @@ const reviewRoute = createRoute({
     params: z.object({ id: z.string().uuid() }),
     body: { content: { 'application/json': { schema: reviewSubmissionSchema } } },
   },
-  middleware: [requireAdmin],
+  middleware: [requireApiKey, requireAdmin],
   responses: {
     200: {
       content: {
@@ -241,7 +241,7 @@ const auditLogRoute = createRoute({
       limit: z.coerce.number().int().min(1).max(100).default(50),
     }),
   },
-  middleware: [requireAdmin],
+  middleware: [requireApiKey, requireAdmin],
   responses: {
     200: {
       content: {

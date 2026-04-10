@@ -9,6 +9,18 @@ interface RateLimitOptions {
   keyPrefix: string;
 }
 
+function getClientIp(c: Parameters<ReturnType<typeof createMiddleware<AppEnv>>>[0]): string {
+  const forwarded = c.req.header('x-forwarded-for');
+  if (forwarded) {
+    const proxyCount =
+      process.env.TRUSTED_PROXY_COUNT != null ? Number(process.env.TRUSTED_PROXY_COUNT) : 1;
+    const ips = forwarded.split(',').map((s) => s.trim());
+    const idx = Math.max(0, ips.length - proxyCount);
+    return ips[idx] ?? 'unknown';
+  }
+  return 'unknown';
+}
+
 export function rateLimit({ windowMs, max, keyPrefix }: RateLimitOptions) {
   return createMiddleware<AppEnv>(async (c, next) => {
     if (!redis) {
@@ -16,7 +28,7 @@ export function rateLimit({ windowMs, max, keyPrefix }: RateLimitOptions) {
       return;
     }
 
-    const ip = c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ?? '127.0.0.1';
+    const ip = getClientIp(c);
     const key = `rl:${keyPrefix}:${ip}`;
     const now = Date.now();
     const windowStart = now - windowMs;

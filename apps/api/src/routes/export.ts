@@ -33,10 +33,22 @@ const exportListRoute = createRoute({
 });
 
 const CSV_COLUMNS = [
-  'id', 'title', 'summary', 'rfpType', 'status',
-  'budgetMin', 'budgetMax', 'currency',
-  'opensAt', 'closesAt', 'applicationUrl', 'sourceUrl',
-  'ecosystems', 'categories', 'tags',
+  'id',
+  'title',
+  'summary',
+  'rfpType',
+  'status',
+  'budgetMin',
+  'budgetMax',
+  'prizePool',
+  'currency',
+  'opensAt',
+  'closesAt',
+  'applicationUrl',
+  'sourceUrl',
+  'ecosystems',
+  'categories',
+  'tags',
 ] as const;
 
 function escapeCsv(value: unknown): string {
@@ -52,9 +64,7 @@ function escapeCsv(value: unknown): string {
 
 function toCsv(rows: Record<string, unknown>[]): string {
   const header = CSV_COLUMNS.join(',');
-  const lines = rows.map((row) =>
-    CSV_COLUMNS.map((col) => escapeCsv(row[col])).join(','),
-  );
+  const lines = rows.map((row) => CSV_COLUMNS.map((col) => escapeCsv(row[col])).join(','));
   return [header, ...lines].join('\n');
 }
 

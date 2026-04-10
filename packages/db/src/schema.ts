@@ -80,6 +80,7 @@ export const fundingOpportunities = pgTable(
     fundingMechanism: varchar('funding_mechanism', { length: 100 }),
     budgetMin: numeric('budget_min', { precision: 15, scale: 2 }),
     budgetMax: numeric('budget_max', { precision: 15, scale: 2 }),
+    prizePool: numeric('prize_pool', { precision: 15, scale: 2 }),
     currency: varchar('currency', { length: 3 }).notNull().default('USD'),
 
     // Dates
@@ -174,6 +175,7 @@ export const submissions = pgTable(
     // Funding
     budgetMin: numeric('budget_min', { precision: 15, scale: 2 }),
     budgetMax: numeric('budget_max', { precision: 15, scale: 2 }),
+    prizePool: numeric('prize_pool', { precision: 15, scale: 2 }),
     currency: varchar('currency', { length: 3 }).notNull().default('USD'),
 
     // Dates

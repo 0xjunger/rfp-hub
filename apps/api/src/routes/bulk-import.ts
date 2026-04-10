@@ -57,6 +57,7 @@ bulkImportRoute.openapi(bulkImportEndpoint, async (c) => {
           ...opp,
           budgetMin: opp.budgetMin != null ? String(opp.budgetMin) : null,
           budgetMax: opp.budgetMax != null ? String(opp.budgetMax) : null,
+          prizePool: opp.prizePool != null ? String(opp.prizePool) : null,
           submittedAt: opp.submittedAt ?? new Date(),
           duplicateOf: dupResult.matchType === 'fuzzy' ? dupResult.matchedId : null,
         })
@@ -66,9 +67,10 @@ bulkImportRoute.openapi(bulkImportEndpoint, async (c) => {
         entityType: 'opportunity',
         entityId: result[0].id,
         action: 'bulk_import',
-        changes: dupResult.matchType === 'fuzzy'
-          ? { duplicateOf: dupResult.matchedId, similarity: dupResult.similarity }
-          : undefined,
+        changes:
+          dupResult.matchType === 'fuzzy'
+            ? { duplicateOf: dupResult.matchedId, similarity: dupResult.similarity }
+            : undefined,
         performedBy: publisherId,
       });
       imported++;

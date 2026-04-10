@@ -21,9 +21,16 @@ function buildUrl(
   return qs ? `?${qs}` : '/';
 }
 
-function formatBudget(min: number | string | null, max: number | string | null, currency?: string) {
+function formatBudget(
+  min: number | string | null,
+  max: number | string | null,
+  currency?: string,
+  prizePool?: number | string | null,
+) {
   const cur = currency || 'USD';
-  if (min && max) return `$${Number(min).toLocaleString()} – $${Number(max).toLocaleString()} ${cur}`;
+  if (prizePool) return `Prize pool: $${Number(prizePool).toLocaleString()} ${cur}`;
+  if (min && max)
+    return `$${Number(min).toLocaleString()} – $${Number(max).toLocaleString()} ${cur}`;
   if (max) return `Up to $${Number(max).toLocaleString()} ${cur}`;
   if (min) return `From $${Number(min).toLocaleString()} ${cur}`;
   return null;
@@ -93,11 +100,7 @@ export default async function HomePage({
             <option value="closed">Closed</option>
             <option value="awarded">Awarded</option>
           </select>
-          <input
-            name="ecosystem"
-            placeholder="Ecosystem..."
-            defaultValue={params.ecosystem}
-          />
+          <input name="ecosystem" placeholder="Ecosystem..." defaultValue={params.ecosystem} />
         </div>
         <button type="submit">Search</button>
       </form>
@@ -116,7 +119,12 @@ export default async function HomePage({
         <>
           <div className="feed">
             {data.map((opp) => {
-              const budget = formatBudget(opp.budgetMin, opp.budgetMax, opp.currency);
+              const budget = formatBudget(
+                opp.budgetMin,
+                opp.budgetMax,
+                opp.currency,
+                opp.prizePool,
+              );
               return (
                 <article key={opp.id} className="feed-item">
                   <div className="feed-accent" data-type={opp.rfpType} />
@@ -153,15 +161,11 @@ export default async function HomePage({
           </div>
 
           <nav className="pagination">
-            {page > 1 && (
-              <a href={buildUrl(params, { page: page - 1 })}>Prev</a>
-            )}
+            {page > 1 && <a href={buildUrl(params, { page: page - 1 })}>Prev</a>}
             <span className="current">
               {meta.page} / {Math.ceil(meta.total / 20) || 1}
             </span>
-            {meta.hasMore && (
-              <a href={buildUrl(params, { page: page + 1 })}>Next</a>
-            )}
+            {meta.hasMore && <a href={buildUrl(params, { page: page + 1 })}>Next</a>}
           </nav>
         </>
       )}

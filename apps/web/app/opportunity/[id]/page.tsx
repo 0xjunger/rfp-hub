@@ -5,8 +5,14 @@ const client = new RfpHubClient({
   baseUrl: process.env.API_URL || 'http://localhost:3000',
 });
 
-function formatBudget(min: number | string | null, max: number | string | null, currency?: string) {
+function formatBudget(
+  min: number | string | null,
+  max: number | string | null,
+  currency?: string,
+  prizePool?: number | string | null,
+) {
   const cur = currency || 'USD';
+  if (prizePool) return `Prize pool: $${Number(prizePool).toLocaleString()} ${cur}`;
   if (min && max)
     return `$${Number(min).toLocaleString()} – $${Number(max).toLocaleString()} ${cur}`;
   if (max) return `Up to $${Number(max).toLocaleString()} ${cur}`;
@@ -14,11 +20,7 @@ function formatBudget(min: number | string | null, max: number | string | null, 
   return null;
 }
 
-export default async function OpportunityPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function OpportunityPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   let opp;
@@ -28,7 +30,7 @@ export default async function OpportunityPage({
     notFound();
   }
 
-  const budget = formatBudget(opp.budgetMin, opp.budgetMax, opp.currency);
+  const budget = formatBudget(opp.budgetMin, opp.budgetMax, opp.currency, opp.prizePool);
 
   return (
     <div>
@@ -102,9 +104,7 @@ export default async function OpportunityPage({
 
           <div className="detail-sidebar-section">
             <h3>Publisher</h3>
-            <p className="detail-sidebar-value">
-              {opp.publisherType.replace('_', ' ')}
-            </p>
+            <p className="detail-sidebar-value">{opp.publisherType.replace('_', ' ')}</p>
           </div>
 
           <div className="detail-sidebar-section">

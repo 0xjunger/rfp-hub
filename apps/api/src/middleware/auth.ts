@@ -49,33 +49,15 @@ export const requireApiKey = createMiddleware<AppEnv>(async (c, next) => {
  * Middleware that requires admin role. Must be used after requireApiKey.
  */
 export const requireAdmin = createMiddleware<AppEnv>(async (c, next) => {
-  const apiKey = c.req.header('X-API-Key');
+  const role = c.get('publisherRole');
 
-  if (!apiKey) {
+  if (!role) {
     throw new HTTPException(401, { message: 'Missing X-API-Key header' });
   }
 
-  const hashed = hashApiKey(apiKey);
-
-  const publisher = await db
-    .select()
-    .from(publishers)
-    .where(eq(publishers.apiKeyHash, hashed))
-    .limit(1);
-
-  if (publisher.length === 0) {
-    throw new HTTPException(401, { message: 'Invalid API key' });
-  }
-
-  if (!publisher[0].isVerified) {
-    throw new HTTPException(403, { message: 'Publisher not verified' });
-  }
-
-  if (publisher[0].role !== 'admin') {
+  if (role !== 'admin') {
     throw new HTTPException(403, { message: 'Admin access required' });
   }
 
-  c.set('publisherId', publisher[0].id);
-  c.set('publisherRole', publisher[0].role);
   await next();
 });

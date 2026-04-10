@@ -26,6 +26,7 @@ export const fundingOpportunitySchema = z.object({
   fundingMechanism: z.string().max(100).nullable(),
   budgetMin: z.number().nonnegative().nullable(),
   budgetMax: z.number().nonnegative().nullable(),
+  prizePool: z.number().nonnegative().nullable(),
   currency: z.string().length(3).default('USD'),
 
   // Dates
@@ -99,7 +100,7 @@ export const searchOpportunitiesSchema = z.object({
   closing_before: z.coerce.date().optional(),
   sort: z
     .string()
-    .regex(/^(created_at|closes_at|budget_max|budget_min|title):(asc|desc)$/)
+    .regex(/^(created_at|closes_at|budget_max|budget_min|prize_pool|title):(asc|desc)$/)
     .default('created_at:desc'),
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().min(1).max(100).default(20),

@@ -17,6 +17,7 @@ export const submissionSchema = z.object({
   // Funding
   budgetMin: z.number().nonnegative().nullable(),
   budgetMax: z.number().nonnegative().nullable(),
+  prizePool: z.number().nonnegative().nullable(),
   currency: z.string().length(3).default('USD'),
 
   // Dates

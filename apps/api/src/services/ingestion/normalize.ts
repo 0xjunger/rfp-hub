@@ -8,6 +8,7 @@ export interface RawOpportunity {
   rfpType?: string;
   budgetMin?: number | null;
   budgetMax?: number | null;
+  prizePool?: number | null;
   currency?: string;
   opensAt?: Date | null;
   closesAt?: Date | null;
@@ -48,6 +49,7 @@ export function normalize(raw: RawOpportunity, sourceId: string, adapterType: st
     externalId: raw.externalId ?? null,
     budgetMin: raw.budgetMin != null ? String(raw.budgetMin) : null,
     budgetMax: raw.budgetMax != null ? String(raw.budgetMax) : null,
+    prizePool: raw.prizePool != null ? String(raw.prizePool) : null,
     currency: raw.currency ?? 'USD',
     opensAt: raw.opensAt ?? null,
     closesAt: raw.closesAt ?? null,

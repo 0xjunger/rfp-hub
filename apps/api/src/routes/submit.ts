@@ -40,6 +40,7 @@ submitRoute.openapi(submitOpportunity, async (c) => {
       ...body,
       budgetMin: body.budgetMin != null ? String(body.budgetMin) : null,
       budgetMax: body.budgetMax != null ? String(body.budgetMax) : null,
+      prizePool: body.prizePool != null ? String(body.prizePool) : null,
     })
     .returning({ id: submissions.id });
 
