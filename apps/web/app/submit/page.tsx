@@ -16,20 +16,15 @@ export default function SubmitPage() {
     const body = {
       title: form.get('title') as string,
       description: form.get('description') as string,
-      summary:
-        (form.get('summary') as string) || (form.get('title') as string).slice(0, 280),
+      summary: (form.get('summary') as string) || (form.get('title') as string).slice(0, 280),
       rfpType: form.get('rfpType') as string,
       applicationUrl: form.get('applicationUrl') as string,
       sourceUrl: form.get('sourceUrl') as string,
       budgetMin: form.get('budgetMin') ? Number(form.get('budgetMin')) : null,
       budgetMax: form.get('budgetMax') ? Number(form.get('budgetMax')) : null,
       currency: 'USD',
-      opensAt: form.get('opensAt')
-        ? new Date(form.get('opensAt') as string)
-        : null,
-      closesAt: form.get('closesAt')
-        ? new Date(form.get('closesAt') as string)
-        : null,
+      opensAt: form.get('opensAt') ? new Date(form.get('opensAt') as string) : null,
+      closesAt: form.get('closesAt') ? new Date(form.get('closesAt') as string) : null,
       categories: (form.get('categories') as string)
         .split(',')
         .map((s) => s.trim())
@@ -38,14 +33,14 @@ export default function SubmitPage() {
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean),
+      prizePool: form.get('prizePool') ? Number(form.get('prizePool')) : null,
       tags: [],
       submitterEmail: (form.get('submitterEmail') as string) || null,
       submitterName: (form.get('submitterName') as string) || null,
     };
 
     try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
       const res = await fetch(`${apiUrl}/api/v1/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,7 +49,16 @@ export default function SubmitPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Submission failed');
+        const msg =
+          typeof data.error === 'string'
+            ? data.error
+            : data.error?.issues
+                ?.map(
+                  (i: { message: string; path: (string | number)[] }) =>
+                    `${i.path.join('.')}: ${i.message}`,
+                )
+                .join('; ') || 'Submission failed';
+        throw new Error(msg);
       }
 
       setSubmitted(true);
@@ -134,6 +138,11 @@ export default function SubmitPage() {
         </label>
 
         <label>
+          Prize Pool ($)
+          <input name="prizePool" type="number" />
+        </label>
+
+        <label>
           Opens
           <input name="opensAt" type="date" />
         </label>
@@ -145,18 +154,12 @@ export default function SubmitPage() {
 
         <label className="form-full">
           Ecosystems
-          <input
-            name="ecosystems"
-            placeholder="ethereum, optimism, arbitrum"
-          />
+          <input name="ecosystems" placeholder="ethereum, optimism, arbitrum" />
         </label>
 
         <label className="form-full">
           Categories
-          <input
-            name="categories"
-            placeholder="infrastructure, research, defi"
-          />
+          <input name="categories" placeholder="infrastructure, research, defi" />
         </label>
 
         <label>

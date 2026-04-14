@@ -20,7 +20,7 @@ app.use('*', logger());
 
 const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS ?? '').split(',').filter(Boolean).length
   ? (process.env.CORS_ORIGINS ?? '').split(',').filter(Boolean)
-  : ['https://rfp-hub.fly.dev', 'http://localhost:3001'];
+  : ['https://rfp-hub.fly.dev', 'https://rfp-hub-web.fly.dev', 'http://localhost:3001'];
 
 app.use(
   '*',

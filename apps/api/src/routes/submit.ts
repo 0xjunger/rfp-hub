@@ -3,6 +3,7 @@ import { submissions } from '@rfp-hub/db';
 import { createSubmissionSchema } from '@rfp-hub/schema';
 import { db } from '../db.js';
 import { writeAuditLog } from '../services/audit.js';
+import { sendTelegramNotification } from '../services/telegram.js';
 import type { AppEnv } from '../types.js';
 
 export const submitRoute = new OpenAPIHono<AppEnv>();
@@ -52,6 +53,18 @@ submitRoute.openapi(submitOpportunity, async (c) => {
     action: 'create',
     performedBy: body.submitterEmail ?? 'anonymous',
   });
+
+  sendTelegramNotification(
+    [
+      `📬 New submission`,
+      `Title: ${body.title}`,
+      `Type: ${body.rfpType}`,
+      `From: ${body.submitterName ?? 'anonymous'}${body.submitterEmail ? ` (${body.submitterEmail})` : ''}`,
+      body.summary ? `Summary: ${body.summary}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n'),
+  );
 
   return c.json(
     {
