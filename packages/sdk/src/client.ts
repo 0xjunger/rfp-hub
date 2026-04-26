@@ -10,6 +10,7 @@ import type {
 export interface ClientOptions {
   baseUrl: string;
   apiKey?: string;
+  next?: { revalidate?: number | false; tags?: string[] };
 }
 
 interface PaginatedResponse<T> {
@@ -25,10 +26,12 @@ interface PaginatedResponse<T> {
 export class RfpHubClient {
   private baseUrl: string;
   private apiKey?: string;
+  private next?: { revalidate?: number | false; tags?: string[] };
 
   constructor(options: ClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, '');
     this.apiKey = options.apiKey;
+    this.next = options.next;
   }
 
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -41,10 +44,13 @@ export class RfpHubClient {
       headers['X-API-Key'] = this.apiKey;
     }
 
+    const { next: callNext, ...restInit } = (init ?? {}) as RequestInit & { next?: unknown };
+    const fetchNext = callNext ?? this.next;
     const res = await fetch(`${this.baseUrl}${path}`, {
-      ...init,
+      ...restInit,
       headers,
-      signal: init?.signal ?? AbortSignal.timeout(15_000),
+      signal: restInit.signal ?? AbortSignal.timeout(15_000),
+      ...(fetchNext ? { next: fetchNext } : {}),
     });
 
     if (!res.ok) {

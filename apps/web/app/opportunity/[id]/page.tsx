@@ -1,8 +1,11 @@
 import { notFound } from 'next/navigation';
 import { RfpHubClient } from '@rfp-hub/sdk';
 
+export const revalidate = 300;
+
 const client = new RfpHubClient({
   baseUrl: process.env.API_URL || 'http://localhost:3000',
+  next: { revalidate: 300 },
 });
 
 function formatBudget(

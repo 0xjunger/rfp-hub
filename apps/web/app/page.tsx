@@ -1,9 +1,10 @@
 import { RfpHubClient } from '@rfp-hub/sdk';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 const client = new RfpHubClient({
   baseUrl: process.env.API_URL || 'http://localhost:3000',
+  next: { revalidate: 60 },
 });
 
 function buildUrl(
